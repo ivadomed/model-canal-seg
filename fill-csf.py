@@ -59,4 +59,3 @@ def segmentcanal(csfseg,moelleseg) :
 #Je sauvegarde l'image(Je ne sais pas comment renommer mes images seulement une façon qui ressemble à la votre)
     Nomdecanal=csfseg.replace("csfseg-manual_RPI_r.nii","canalseg-manual_RPI_r.nii.")
     save_Nifti1(img_fill,img, Nomdecanal)
-segmentcanal("sub-pavia04_T2w_csfseg-manual_RPI_r.nii","sub-pavia04_T2w_seg.nii")
