@@ -12,11 +12,11 @@ import argparse
 def get_parser():
     parser = argparse.ArgumentParser(
     description="Close the segmentation of the CSF to get the segmentation of the canal." )
-    parser.add_argument('-i', required = True, type=str,
+    parser.add_argument('-i', dest='CSF_seg', required = True, type=str,
                         help="Input segmentation of the CSF.")
-    parser.add_argument('-o', required = True, type=str,
+    parser.add_argument('-o', dest='Output_name', required = True, type=str,
                         help="Ouput image name.")
-    parser.add_argument('-s', required = True, type=str, 
+    parser.add_argument('-s', dest='Cord_seg', required = True, type=str, 
                         help="Segmentation of the spinal cord ")
 
     return parser
@@ -33,9 +33,9 @@ def main() :
         nib.save(image, filename)
 
 #Je load l'image
-    moelle = nib.load(args.s)
+    moelle = nib.load(args.Cord_seg)
     moelle_np = moelle.get_fdata()
-    img = nib.load(args.i)
+    img = nib.load(args.CSF_seg)
     img_np = img.get_fdata()
 
 #Je copie l'image pour avoir l'original pour la sauvegarder à la fin
@@ -75,8 +75,11 @@ def main() :
         slice = slice+1 #Je passe à la prochaine slice
 
 #Je sauvegarde l'image(Je ne sais pas comment renommer mes images seulement une façon qui ressemble à la votre)
-    save_Nifti1(img_fill, img, args.o)
+    save_Nifti1(img_fill, img, args.Output_name)
 
 
 if __name__ == '__main__':
-    main() 
+    parser = get_parser()
+    args = parser.parse_args()
+    main()
+    print(f'Segmentation realised and saved in {args.Output_name}') 
