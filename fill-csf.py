@@ -50,27 +50,21 @@ def main() :
     h,w = img_b[:, :, 1].shape
 
     while slice < imagenbr : #J'itère sur les images de coupe
-        cmcsf = (sc.ndimage.center_of_mass(img_b[:, :, slice]))
-        cmmoelle = (sc.ndimage.center_of_mass(moelle_b[:, :, slice]))
-    
-        if (np.isnan(cmcsf[0]) and 
-            np.isnan(cmcsf[1])) : #Si il n'y as pas de segmentation sur le csf on ne change rien
-            img_fill[:, :, slice] = img_b[:, :, slice] 
+        if np.sum(img_b[:,:,slice] == 1) == 0 :#Si il n'y as pas de segmentation sur le csf on ne change rien
+            img_fill[:, :, slice] = img_b[:, :, slice]
 
-        else : #Si la segmentation n'est pas nulle dans la slice
+        elif np.sum(moelle_b[:,:,slice] == 1) == 0:#Si il n'y as pas de segmentation sur la moelle je ne change rien et je retire la segmentation du csf
+            img_fill[:, :, slice] = 0
+        
+        else :
+            cmmoelle = (sc.ndimage.center_of_mass(moelle_b[:, :, slice])) 
+            cmmoelle = list(cmmoelle)
+            cmmoelle[0] = int(cmmoelle[0])
+            cmmoelle[1] = int(cmmoelle[1])
+            img_fill[:,:,slice] = flood_fill(img_fill[:,:,slice], (cmmoelle[0],cmmoelle[1]), 1)
 
-            if (np.isnan(cmmoelle[0]) and 
-                np.isnan(cmmoelle[1])) :#Si il n'y as pas de segmentation sur la moelle je ne change rien et je retire la segmentation du csf
-                img_fill[:, :, slice] = 0
-
-            else :#Si il y as une segmentation de la moelle et du csf je prend le centre de masse de la moelle 
-                cmmoelle = list(cmmoelle)
-                cmmoelle[0] = int(cmmoelle[0])
-                cmmoelle[1] = int(cmmoelle[1])
-                img_fill[:,:,slice] = flood_fill(img_fill[:,:,slice], (cmmoelle[0],cmmoelle[1]), 1)
-
-                if np.sum(img_fill[:,:,slice] == 1) == (h*w): #Si ma forme n'est pas fermée je reprend l'image de base et je fais une fermeture
-                    img_fill[:, :, slice] = cv.morphologyEx(img_b[:,:,slice], cv.MORPH_CLOSE,disk(20))
+            if np.sum(img_fill[:,:,slice] == 1) == (h*w): #Si ma forme n'est pas fermée je reprend l'image de base et je fais une fermeture
+                        img_fill[:, :, slice] = cv.morphologyEx(img_b[:,:,slice], cv.MORPH_CLOSE,disk(20))
             
         slice = slice+1 #Je passe à la prochaine slice
 
