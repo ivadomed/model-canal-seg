@@ -64,7 +64,7 @@ def main() :
             img_fill[:,:,slice] = flood_fill(img_fill[:,:,slice], (cmmoelle[0],cmmoelle[1]), 1)
 
             if np.sum(img_fill[:,:,slice] == 1) == (h*w): #Si ma forme n'est pas fermée je reprend l'image de base et je fais une fermeture
-                        img_fill[:, :, slice] = cv.morphologyEx(img_b[:,:,slice], cv.MORPH_CLOSE,disk(20))
+                        img_fill[:, :, slice] = cv.morphologyEx(img_b[:,:,slice], cv.MORPH_CLOSE,disk(5))
             
         slice = slice+1 #Je passe à la prochaine slice
 
