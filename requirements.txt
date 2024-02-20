@@ -1,0 +1,5 @@
+#Liste des librairies à import
+nibabel
+argparse
+opencv-python
+scikit-image
