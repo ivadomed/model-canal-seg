@@ -2,7 +2,8 @@
 Pour utiliser le code de segmentation du canal spinal à partir des segmentations de la moelle et du CSF il est nécessaire d'installer les librairies utilisées. la ligne qui permet d'installer ces librairie est incluse dans celles pour cloner le Github.
 Ensuite, il faut cloner le Github à l'aide de la suite de commande suivante : 
 ~~~
-pip install -r requirements.txt`
+pip install -r requirements.txt
+git clone https://github.com/ivadomed/model-csf-seg.git
 ~~~
 
 **Fonctionnement**
