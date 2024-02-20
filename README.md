@@ -18,10 +18,15 @@ pip install -r requirements.txt
 
 # Utilisation
 Le code prend en entrée 3 arguments   
+* `-i`: Segmentation du CSF (.nii.gz)
 
--s Le fichier nii.gz de segmentation de la moelle épinière  
+* `-s`:  Segmentation de la moelle épinière  (.nii.gz) 
 
--o Le nom que vous souhaiter donner au fichier  
+* `-o` Le nom que vous souhaiter donner au fichier (.nii.gz) 
 
--i Le fichier nii.gz de la segmentation du csf  
+Voici donc un exemple de commande pour utiliser la fonction :
+~~~
+python3 fill-csf.py -i <CSF seg> -s <spinal cord seg> -o <output>
+~~~
+ 
 
