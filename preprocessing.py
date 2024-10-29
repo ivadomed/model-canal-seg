@@ -3,10 +3,98 @@
 # those are the function I applied to the data folders before lauching the nnUNet training
 
 import os
-import subprocess
 from pathlib import Path
+import sys, argparse, textwrap
+import multiprocessing as mp
+from functools import partial
+from tqdm.contrib.concurrent import process_map
+import nibabel as nib
+import numpy as np
+import torchio as tio
 
 # reorientation of the images
+
+def change_orientation(im_src, orientation, im_dst=None, inverse=False):
+    """
+    Copied from https://github.com/spinalcordtoolbox/spinalcordtoolbox/
+
+    :param im_src: source image
+    :param orientation: orientation string (SCT "from" convention)
+    :param im_dst: destination image (can be the source image for in-place
+                   operation, can be unset to generate one)
+    :param inverse: if you think backwards, use this to specify that you actually
+                    want to transform *from* the specified orientation, not *to* it.
+    :return: an image with changed orientation
+
+    .. note::
+        - the resulting image has no path member set
+        - if the source image is < 3D, it is reshaped to 3D and the destination is 3D
+    """
+
+    if len(im_src.data.shape) < 3:
+        pass  # Will reshape to 3D
+    elif len(im_src.data.shape) == 3:
+        pass  # OK, standard 3D volume
+    elif len(im_src.data.shape) == 4:
+        pass  # OK, standard 4D volume
+    elif len(im_src.data.shape) == 5 and im_src.header.get_intent()[0] == "vector":
+        pass  # OK, physical displacement field
+    else:
+        raise NotImplementedError("Don't know how to change orientation for this image")
+
+    im_src_orientation = im_src.orientation
+    im_dst_orientation = orientation
+    if inverse:
+        im_src_orientation, im_dst_orientation = im_dst_orientation, im_src_orientation
+
+    perm, inversion = _get_permutations(im_src_orientation, im_dst_orientation)
+
+    if im_dst is None:
+        im_dst = im_src.copy()
+        im_dst._path = None
+
+    im_src_data = im_src.data
+    if len(im_src_data.shape) < 3:
+        im_src_data = im_src_data.reshape(tuple(list(im_src_data.shape) + ([1] * (3 - len(im_src_data.shape)))))
+
+    # Update data by performing inversions and swaps
+
+    # axes inversion (flip)
+    data = im_src_data[::inversion[0], ::inversion[1], ::inversion[2]]
+
+    # axes manipulations (transpose)
+    if perm == [1, 0, 2]:
+        data = np.swapaxes(data, 0, 1)
+    elif perm == [2, 1, 0]:
+        data = np.swapaxes(data, 0, 2)
+    elif perm == [0, 2, 1]:
+        data = np.swapaxes(data, 1, 2)
+    elif perm == [2, 0, 1]:
+        data = np.swapaxes(data, 0, 2)  # transform [2, 0, 1] to [1, 0, 2]
+        data = np.swapaxes(data, 0, 1)  # transform [1, 0, 2] to [0, 1, 2]
+    elif perm == [1, 2, 0]:
+        data = np.swapaxes(data, 0, 2)  # transform [1, 2, 0] to [0, 2, 1]
+        data = np.swapaxes(data, 1, 2)  # transform [0, 2, 1] to [0, 1, 2]
+    elif perm == [0, 1, 2]:
+        # do nothing
+        pass
+    else:
+        raise NotImplementedError()
+
+    # Update header
+
+    im_src_aff = im_src.hdr.get_best_affine()
+    aff = nib.orientations.inv_ornt_aff(
+        np.array((perm, inversion)).T,
+        im_src_data.shape)
+    im_dst_aff = np.matmul(im_src_aff, aff)
+
+    im_dst.header.set_qform(im_dst_aff)
+    im_dst.header.set_sform(im_dst_aff)
+    im_dst.header.set_data_shape(data.shape)
+    im_dst.data = data
+
+    return im_dst
 
 # requires sct installed, not fast, will probably be changed soon for the next training
 
@@ -16,36 +104,26 @@ def apply_process_to_files(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
-            # calls an 'sct_image' and 'setorient' on each file
-            try:
-                subprocess.run([
-                    'sct_image',
-                    '-i', file_path,
-                    '- setorient', 'LAS'
-                ], check=True)
-                print(f"sct_image setorientation applied with {file_path}")
-
-                
-            except subprocess.CalledProcessError as e:
-                print(f"Error running sct setorientation: {e}")
+            if file_path.endswith('.nii.gz'):
+                # load the image
+                im = nib.load(file_path)
+                # change the orientation
+                im = change_orientation(im, 'LAS')
+                # save the image
+                nib.save(im, file_path)
+                print(f"Orientation modifiée pour : {file_path}")
+            # calls change_orientation on each file     
 
 # here I applied it to imagesTs, labelsTr and imagesTr
 apply_process_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTs")
 apply_process_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr")
 apply_process_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTr")
 
+
 # then to ensure that the direction and the origin of the images were the samed
 # so qform and sform were the same between image and seg
 
 # OTHER VERSION USING TORCHIO
-import sys, argparse, textwrap
-import multiprocessing as mp
-from functools import partial
-from tqdm.contrib.concurrent import process_map
-from pathlib import Path
-import nibabel as nib
-import numpy as np
-import torchio as tio
 
 def _transform_seg2image(
         image_path,
