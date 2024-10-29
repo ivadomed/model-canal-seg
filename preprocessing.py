@@ -34,7 +34,91 @@ def apply_process_to_files(directory):
 # then to ensure that the direction and the origin of the images were the samed
 # so qform and sform were the same between image and seg
 
+# OTHER VERSION USING TORCHIO
+import sys, argparse, textwrap
+import multiprocessing as mp
+from functools import partial
+from tqdm.contrib.concurrent import process_map
+from pathlib import Path
 import nibabel as nib
+import numpy as np
+import torchio as tio
+
+def _transform_seg2image(
+        image_path,
+        seg_path,
+        output_seg_path,
+        override=False,
+    ):
+    '''
+    Wrapper function to handle IO.
+    '''
+    image_path = Path(image_path)
+    seg_path = Path(seg_path)
+    output_seg_path = Path(output_seg_path)
+
+    # If the output image already exists and we are not overriding it, return
+    if not override and output_seg_path.exists():
+        return
+
+    # Check if the segmentation file exists
+    if not seg_path.is_file():
+        output_seg_path.is_file() and output_seg_path.unlink()
+        print(f'Error: {seg_path}, Segmentation file not found')
+        return
+
+    image = nib.load(image_path)
+    seg = nib.load(seg_path)
+
+    output_seg = transform_seg2image(image, seg)
+
+    # Ensure correct segmentation dtype, affine and header
+    output_seg = nib.Nifti1Image(
+        np.asanyarray(output_seg.dataobj).round().astype(np.uint8),
+        output_seg.affine, output_seg.header
+    )
+    output_seg.set_data_dtype(np.uint8)
+    output_seg.set_qform(output_seg.affine)
+    output_seg.set_sform(output_seg.affine)
+
+    # Make sure output directory exists and save the segmentation
+    output_seg_path.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(output_seg, output_seg_path)
+
+def transform_seg2image(
+        image,
+        seg,
+    ):
+    '''
+    Transform the segmentation to the image space to have the same origin, spacing, direction and shape as the image.
+
+    Parameters
+    ----------
+    image : nibabel.Nifti1Image
+        Image.
+    seg : nibabel.Nifti1Image
+        Segmentation.
+
+    Returns
+    -------
+    nibabel.Nifti1Image
+        Output segmentation.
+    '''
+    image_data = np.asanyarray(image.dataobj).astype(np.float64)
+    seg_data = np.asanyarray(seg.dataobj).round().astype(np.uint8)
+
+    # Make TorchIO images
+    tio_img=tio.ScalarImage(tensor=image_data[None, ...], affine=image.affine)
+    tio_seg=tio.LabelMap(tensor=seg_data[None, ...], affine=seg.affine)
+
+    # Resample the segmentation to the image space
+    tio_output_seg = tio.Resample(tio_img)(tio_seg)
+    output_seg_data = tio_output_seg.data.numpy()[0, ...].astype(np.uint8)
+
+    output_seg = nib.Nifti1Image(output_seg_data, image.affine, seg.header)
+
+    return output_seg
+
 
 # function to copy the header and affine of a file to another
 def trouver_image_correspondante(nom_base, dossier_cible):
@@ -56,19 +140,7 @@ def remplacer_header_et_affine(dossier_base, dossier_cible):
             chemin_cible = trouver_image_correspondante(nom_fichier_base, dossier_cible)
             
             if chemin_cible is not None:
-                # load images with nibabel
-                img_base = nib.load(chemin_base)
-                img_cible = nib.load(chemin_cible)
-                
-                # extract the header and affine matrix of the base image
-                new_header = img_base.header
-                new_affine = img_base.affine
-                
-                # create a new image with the affine and header of the base image
-                img_cible_modifiee = nib.Nifti1Image(img_cible.get_fdata(), new_affine, header=new_header)
-                
-                # save the modified image
-                nib.save(img_cible_modifiee, chemin_cible)
+                _transform_seg2image(chemin_base, chemin_cible, chemin_cible, override=True)
                 print(f"Header et affine remplacés pour : {nom_fichier_base} -> {nom_fichier_base.replace('_0000.nii.gz', '.nii.gz')}")
             else:
                 print(f"Aucune correspondance trouvée pour {nom_fichier_base}")
