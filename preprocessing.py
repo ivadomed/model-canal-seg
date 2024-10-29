@@ -30,6 +30,9 @@ def apply_process_to_files(directory):
                 print(f"Error running sct setorientation: {e}")
 
 # here I applied it to imagesTs, labelsTr and imagesTr
+apply_process_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTs")
+apply_process_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr")
+apply_process_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTr")
 
 # then to ensure that the direction and the origin of the images were the samed
 # so qform and sform were the same between image and seg
@@ -130,7 +133,7 @@ def trouver_image_correspondante(nom_base, dossier_cible):
     return None
 
 # principal function
-def remplacer_header_et_affine(dossier_base, dossier_cible):
+def register_seg_to_image(dossier_base, dossier_cible):
     # go through all files in the base directory
     for nom_fichier_base in os.listdir(dossier_base):
         if nom_fichier_base.endswith('_0000.nii.gz'):  
@@ -144,3 +147,6 @@ def remplacer_header_et_affine(dossier_base, dossier_cible):
                 print(f"Header et affine remplacés pour : {nom_fichier_base} -> {nom_fichier_base.replace('_0000.nii.gz', '.nii.gz')}")
             else:
                 print(f"Aucune correspondance trouvée pour {nom_fichier_base}")
+
+# apply to the training set
+register_seg_to_image("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTr", "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr")
