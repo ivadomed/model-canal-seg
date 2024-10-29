@@ -12,6 +12,7 @@ import nibabel as nib
 import numpy as np
 import torchio as tio
 from image import Image
+import time
 
 # reorientation of the images
 
@@ -33,13 +34,16 @@ def reorient(path):
 
 # apply to a directory
 def apply_reorient_to_files(directory):
+    t1 = time.time()
     # visits all files in the given directory
     for root, dirs, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
             if file_path.endswith('.nii.gz'):
                 reorient(file_path)
-            # calls change_orientation on each file     
+            # calls change_orientation on each file   
+    t2 = time.time()
+    print(f"Reorientation of {directory} done in {t2-t1} seconds")  
 
 # here I applied it to imagesTs, labelsTr and imagesTr
 apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTs")
@@ -139,6 +143,7 @@ def trouver_image_correspondante(nom_base, dossier_cible):
 
 # principal function
 def register_seg_to_image(dossier_base, dossier_cible):
+    t1 = time.time()
     # go through all files in the base directory
     for nom_fichier_base in os.listdir(dossier_base):
         if nom_fichier_base.endswith('_0000.nii.gz'):  
@@ -152,6 +157,8 @@ def register_seg_to_image(dossier_base, dossier_cible):
                 print(f"Header et affine remplacés pour : {nom_fichier_base} -> {nom_fichier_base.replace('_0000.nii.gz', '.nii.gz')}")
             else:
                 print(f"Aucune correspondance trouvée pour {nom_fichier_base}")
+    t2 = time.time()
+    print(f"Registration done in {t2-t1} seconds")
 
 # apply to the training set
 register_seg_to_image("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTr", "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr")
