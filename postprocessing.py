@@ -5,57 +5,55 @@ import os
 
 def keep_largest_connected_component(segmentation):
     """
-    Garde uniquement le plus grand composant connexe d'une image de segmentation binaire.
+    Keeps the largest connected component in a binary image.
     
     Parameters:
-        segmentation (numpy.ndarray): Image de segmentation binaire (3D).
+        segmentation (numpy.ndarray): binary image (3D).
     
     Returns:
-        numpy.ndarray: Image de segmentation avec uniquement le plus grand composant connexe.
+        numpy.ndarray: binary image with only the largest connected component.
     """
-    # Label tous les composants connexes
+    # label connected components in the binary image
     labeled_array, num_features = label(segmentation)
     
-    # Si plusieurs composants connexes sont trouvés
+    # if there are multiple connected components
     if num_features > 1:
-        # Calculer les tailles de chaque composant
+        # count the size of each connected component
         component_sizes = np.bincount(labeled_array.ravel())
         print('component_sizes:', component_sizes)
         
-        # Ignorer la taille du background (index 0)
+        # ignore the background (component 0)
         component_sizes[0] = 0
         
-        # Trouver l'indice du plus grand composant
+        # find the largest connected component
         largest_component = component_sizes.argmax()
         print('largest_component:', largest_component)
         
-        # Créer une nouvelle image avec uniquement le plus grand composant
+        # create a binary mask with only the largest connected component
         largest_component_mask = (labeled_array == largest_component).astype(np.uint8)
         print('new image components:', np.bincount(largest_component_mask.ravel()))
         
         return largest_component_mask
     else:
         print('No post-processing needed')
-        # S'il n'y a qu'un seul composant connexe, on retourne l'image d'origine
+        # if there is only one connected component, return the original image
         return segmentation
 
 def process_segmentation_file(input_file, output_file):
     """
-    Charge un fichier NIfTI, applique le post-traitement et sauvegarde le résultat.
+    Loads a NIfTI file, applies the post-processing and saves the result.
     
     Parameters:
-        input_file (str): Chemin du fichier NIfTI d'entrée (segmentation binaire).
-        output_file (str): Chemin du fichier NIfTI de sortie (après post-traitement).
+        input_file (str): path to the input NIfTI file (before post-processing).
+        output_file (str): path to the output NIfTI file (after post-processing).
     """
     print('Processing:', input_file)
-
-    # Charger l'image NIfTI
     img = nib.load(input_file)
     segmentation = img.get_fdata()
-    # Appliquer le post-traitement
+    # apply the post-processing
     cleaned_segmentation = keep_largest_connected_component(segmentation)
 
-    # Sauvegarder le résultat dans un nouveau fichier NIfTI
+    # save the cleaned segmentation
     print('Saving:', output_file)
     cleaned_img = nib.Nifti1Image(cleaned_segmentation, img.affine)
     nib.save(cleaned_img, output_file)
@@ -68,11 +66,7 @@ process_segmentation_file(input_file, output_file)'''
 
 def process_segmentation_folder(input_folder, output_folder):
     """
-    Charge tous les fichiers NIfTI d'un dossier, applique le post-traitement et sauvegarde les résultats.
-    
-    Parameters:
-        input_folder (str): Chemin du dossier d'entrée contenant les fichiers NIfTI de segmentation.
-        output_folder (str): Chemin du dossier de sortie pour les fichiers NIfTI après post-traitement.
+    Processes all NIfTI files in a folder.
     """
     for file_name in os.listdir(input_folder):
         if file_name.endswith('.nii.gz'):
