@@ -31,15 +31,15 @@ def keep_largest_connected_component(segmentation):
         
         # Créer une nouvelle image avec uniquement le plus grand composant
         largest_component_mask = (labeled_array == largest_component).astype(np.uint8)
-        print('largest_component_mask_size:', np.bincount(largest_component_mask.ravel()))
+        print('new image components:', np.bincount(largest_component_mask.ravel()))
         
-        '''return largest_component_mask'''
+        return largest_component_mask
     else:
         print('No post-processing needed')
-        '''# S'il n'y a qu'un seul composant connexe, on retourne l'image d'origine
-        return segmentation'''
+        # S'il n'y a qu'un seul composant connexe, on retourne l'image d'origine
+        return segmentation
 
-def process_segmentation_file(input_file, output_file=None):
+def process_segmentation_file(input_file, output_file):
     """
     Charge un fichier NIfTI, applique le post-traitement et sauvegarde le résultat.
     
@@ -52,16 +52,21 @@ def process_segmentation_file(input_file, output_file=None):
     # Charger l'image NIfTI
     img = nib.load(input_file)
     segmentation = img.get_fdata()
-    keep_largest_connected_component(segmentation)
+    # Appliquer le post-traitement
+    cleaned_segmentation = keep_largest_connected_component(segmentation)
 
-    '''# Appliquer le post-traitement
-    cleaned_segmentation = keep_largest_connected_component(segmentation)'''
-
-    '''# Sauvegarder le résultat dans un nouveau fichier NIfTI
+    # Sauvegarder le résultat dans un nouveau fichier NIfTI
+    print('Saving:', output_file)
     cleaned_img = nib.Nifti1Image(cleaned_segmentation, img.affine)
-    nib.save(cleaned_img, output_file)'''
+    nib.save(cleaned_img, output_file)
 
-def process_segmentation_folder(input_folder, output_folder=None):
+# test on a single file
+'''input_file = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/test_on_one_seg/sub-amuJD_T2w_000.nii.gz"    
+output_file = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/test_on_one_seg/sub-amuJD_T2w_000_cleaned.nii.gz"
+
+process_segmentation_file(input_file, output_file)'''
+
+def process_segmentation_folder(input_folder, output_folder):
     """
     Charge tous les fichiers NIfTI d'un dossier, applique le post-traitement et sauvegarde les résultats.
     
@@ -72,10 +77,10 @@ def process_segmentation_folder(input_folder, output_folder=None):
     for file_name in os.listdir(input_folder):
         if file_name.endswith('.nii.gz'):
             input_file = os.path.join(input_folder, file_name)
-            # output_file = os.path.join(output_folder, file_name)
-            process_segmentation_file(input_file)
+            output_file = os.path.join(output_folder, file_name.replace('.nii.gz', '_cleaned.nii.gz'))
+            process_segmentation_file(input_file, output_file)
 
-# input = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/segmentations_raw"
-input = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr"
-process_segmentation_folder(input)
+input = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/test_4_seg"
+output = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/test_4_seg_cleaned"
+process_segmentation_folder(input, output)
 
