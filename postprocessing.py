@@ -1,6 +1,7 @@
 import numpy as np
 import nibabel as nib
 from scipy.ndimage import label
+import os
 
 def keep_largest_connected_component(segmentation):
     """
@@ -38,7 +39,7 @@ def keep_largest_connected_component(segmentation):
         '''# S'il n'y a qu'un seul composant connexe, on retourne l'image d'origine
         return segmentation'''
 
-def process_segmentation_file(input_file, output_file):
+def process_segmentation_file(input_file, output_file=None):
     """
     Charge un fichier NIfTI, applique le post-traitement et sauvegarde le résultat.
     
@@ -60,9 +61,21 @@ def process_segmentation_file(input_file, output_file):
     cleaned_img = nib.Nifti1Image(cleaned_segmentation, img.affine)
     nib.save(cleaned_img, output_file)'''
 
-if __name__ == "__main__":
-    # Exemples d'utilisation
-    input_nifti_file = "path_to_your_segmentation_file.nii.gz"
-    output_nifti_file = "path_to_your_cleaned_segmentation_file.nii.gz"
+def process_segmentation_folder(input_folder, output_folder=None):
+    """
+    Charge tous les fichiers NIfTI d'un dossier, applique le post-traitement et sauvegarde les résultats.
     
-    process_segmentation_file(input_nifti_file, output_nifti_file)
+    Parameters:
+        input_folder (str): Chemin du dossier d'entrée contenant les fichiers NIfTI de segmentation.
+        output_folder (str): Chemin du dossier de sortie pour les fichiers NIfTI après post-traitement.
+    """
+    for file_name in os.listdir(input_folder):
+        if file_name.endswith('.nii.gz'):
+            input_file = os.path.join(input_folder, file_name)
+            # output_file = os.path.join(output_folder, file_name)
+            process_segmentation_file(input_file)
+
+# input = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/segmentations_raw"
+input = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr"
+process_segmentation_folder(input)
+
