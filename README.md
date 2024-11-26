@@ -1,7 +1,7 @@
 # Automatic segmentation of spinal canal
 
 <p align="center">
-  <img src="https://github.com/ivadomed/model-canal-seg/blob/abels/assets/canal_seg_visual.gif" alt="Segmentation on whole-spine image viewed on axial and sagittal planes" width="800">
+  <img src="https://github.com/ivadomed/model-canal-seg/blob/abels/assets/canal_seg_visual.gif" alt="Segmentation on whole-spine image viewed on axial and sagittal planes" width="500">
 </p>
 
 This repository contains the code for deep learning-based segmentation of the spinal canal. 
