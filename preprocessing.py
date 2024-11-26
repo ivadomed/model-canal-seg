@@ -2,6 +2,8 @@
 
 # those are the function I applied to the data folders before lauching the nnUNet training
 
+# flake8: noqa
+
 import os
 from pathlib import Path
 import sys, argparse, textwrap
@@ -46,15 +48,13 @@ def apply_reorient_to_files(directory):
     print(f"Reorientation of {directory} done in {t2-t1} seconds")  
 
 # here I applied it to imagesTs, labelsTr and imagesTr
-apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTs")
-apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr")
-apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTr")
+apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/imagesTs")
+apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/labelsTr")
+apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/imagesTr")
 
 
 # then to ensure that the direction and the origin of the images were the samed
 # so qform and sform were the same between image and seg
-
-# OTHER VERSION USING TORCHIO
 
 def _transform_seg2image(
         image_path,
@@ -161,4 +161,4 @@ def register_seg_to_image(dossier_base, dossier_cible):
     print(f"Registration done in {t2-t1} seconds")
 
 # apply to the training set
-register_seg_to_image("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/imagesTr", "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean_copy/labelsTr")
+register_seg_to_image("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/imagesTr", "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/labelsTr")
