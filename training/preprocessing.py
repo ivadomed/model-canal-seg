@@ -47,12 +47,6 @@ def apply_reorient_to_files(directory):
     t2 = time.time()
     print(f"Reorientation of {directory} done in {t2-t1} seconds")  
 
-# here I applied it to imagesTs, labelsTr and imagesTr
-apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/imagesTs")
-apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/labelsTr")
-apply_reorient_to_files("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/imagesTr")
-
-
 # then to ensure that the direction and the origin of the images were the samed
 # so qform and sform were the same between image and seg
 
@@ -160,5 +154,21 @@ def register_seg_to_image(dossier_base, dossier_cible):
     t2 = time.time()
     print(f"Registration done in {t2-t1} seconds")
 
-# apply to the training set
-register_seg_to_image("C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/imagesTr", "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/labelsTr")
+parser = argparse.ArgumentParser(description="Script to post-process a segmentation")
+parser.add_argument('--input', type=str, required=True, help="Input path")
+parser.add_argument('--output', type=str, required=True, help="Output path")
+
+args = parser.parse_args()
+
+input_path = args.input
+output_path = args.output
+
+# reorient files from folder and adjust their header and affine
+if os.path.isdir(input_path):
+    print(f"Reorienting files in {input_path}")
+    apply_reorient_to_files(input_path)
+    print(f"Registering segmentations to images in {input_path} to {output_path}")
+    register_seg_to_image(input_path, output_path)
+else:
+    print(f"Error: {input_path} is not a directory")
+    sys.exit(1)

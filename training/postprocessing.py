@@ -1,7 +1,17 @@
+# this script defines a post processing pipeline 
+# since the model aims to segment the pinal canal which is a connected component
+# we can use the largest connected component as the final segmentation
+
+# the function keep_largest_connected_component() takes a binary image as input and returns the largest connected component
+
+# the function process_segmentation_file() loads a NIfTI file, applies the post-processing and saves the result
+# the function process_segmentation_folder() processes all NIfTI files in a folder
+
 import numpy as np
 import nibabel as nib
 from scipy.ndimage import label
 import os
+import argparse
 
 # flake8: noqa
 
@@ -66,12 +76,6 @@ def process_segmentation_file(input_file, output_file):
         cleaned_img = nib.Nifti1Image(cleaned_segmentation, img.affine)
         nib.save(cleaned_img, output_file)
 
-# test on a single file
-'''input_file = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/test_on_one_seg/sub-amuJD_T2w_000.nii.gz"    
-output_file = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/test_for_postprocessing/test_on_one_seg/sub-amuJD_T2w_000_cleaned.nii.gz"
-
-process_segmentation_file(input_file, output_file)'''
-
 
 def process_segmentation_folder(input_folder, output_folder, overwrite=False):
     """
@@ -88,7 +92,17 @@ def process_segmentation_folder(input_folder, output_folder, overwrite=False):
                 output_file = os.path.join(output_folder, file_name)
                 process_segmentation_file(input_file, output_file)
 
+parser = argparse.ArgumentParser(description="Script to post-process a segmentation")
+parser.add_argument('--input', type=str, required=True, help="Input path")
+parser.add_argument('--output', type=str, required=True, help="Output path")
 
-input = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/labelsTr2"
-output = "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/segmentation/training/data/datasets/Dataset011_clean/labelsTr2"
-process_segmentation_folder(input, output, overwrite=True)
+args = parser.parse_args()
+
+input_path = args.input
+output_path = args.output
+
+# apply the post-processing to all NIfTI files in the input folder
+if os.path.isdir(input_path):
+    process_segmentation_folder(input_path, output_path)
+elif os.path.isfile(input_path):
+    process_segmentation_file(input_path, output_path)

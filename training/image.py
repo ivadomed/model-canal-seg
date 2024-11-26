@@ -1,3 +1,6 @@
+# defines class Image from SCT
+# this can be used to manipulate image data and metadata
+
 # flake8: noqa
 
 import os
