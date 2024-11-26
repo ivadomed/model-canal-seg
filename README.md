@@ -1,6 +1,8 @@
 # Automatic segmentation of spinal canal
 
-![Segmentation on whole-spine image viewed on axial and sagittal planes](https://github.com/ivadomed/model-canal-seg/blob/abels/assets/canal_seg_visual.gif)
+<p align="center">
+  <img src="https://github.com/ivadomed/model-canal-seg/blob/abels/assets/canal_seg_visual.gif" alt="Segmentation on whole-spine image viewed on axial and sagittal planes" width="800">
+</p>
 
 This repository contains the code for deep learning-based segmentation of the spinal canal. 
 The code is based on the [nnUNet framework](https://github.com/MIC-DKFZ/nnUNet).
