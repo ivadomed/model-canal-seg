@@ -1,0 +1,5 @@
+{
+    "path_data"   : "C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/biomarker-analysis/test-dcm-brno",
+    "script"      : "sc_seg.sh",
+    "jobs"        : -1
+}
