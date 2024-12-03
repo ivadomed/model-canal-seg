@@ -2,6 +2,7 @@
 
 # to be runned with sct_run_batch using batch_config.json
 # sct_run_batch -config batch_config.json 
+# do not forget to put the path also in the batch_config.json file
 
 # check if the user has provided a subject BIDS folder
 if [ -z "$1" ]; then
@@ -9,7 +10,8 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-global_folder="C:/Users/abels/OneDrive/Documents/NeuroPoly/canal_seg/biomarker-analysis/test-dcm-brno"
+# complete with the link of the bids global folder
+global_folder="/home/ge.polymtl.ca/p121315/canal_analysis/test-dcm-brno"
 
 # get the subject BIDS folder
 subject_dir="$global_folder/$1"

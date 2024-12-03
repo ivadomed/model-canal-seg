@@ -1,0 +1,10 @@
+# files to ignore, for instance for the logs and results of sct_run_bacth
+
+#
+labelling/data_processed/
+#
+labelling/log/
+#
+labelling/qc/
+#
+labelling/results/
