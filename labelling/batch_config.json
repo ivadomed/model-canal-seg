@@ -1,5 +1,5 @@
 {
     "path_data"   : "~/canal_analysis/test-dcm-brno",
-    "script"      : "sc_seg.sh",
+    "script"      : "tss_and_label_vert.sh",
     "jobs"        : -1
 }

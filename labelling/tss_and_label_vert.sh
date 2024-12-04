@@ -13,6 +13,8 @@ fi
 # complete with the link of the bids global folder
 global_folder="/home/ge.polymtl.ca/p121315/canal_analysis/test-dcm-brno"
 
+/home/ge.polymtl.ca/p121315/canal_analysis/
+
 # get the subject BIDS folder
 subject_dir="$global_folder/$1"
 
@@ -34,7 +36,7 @@ fi
 # command to segment the spinal cord and other structures
 sct_command="sct_deepseg -task totalspineseg"
 # command to label the spinal cord
-sct_command2="sct_label_vertebrae"
+sct_command2="sct_label_vertebrae  -qc /home/ge.polymtl.ca/p121315/canal_analysis/qc_vertebrae_labelling -c t2 -ofolder $anat_dir"
 
 
 # goes through all the T2w files in the 'anat' sub-folder
@@ -46,12 +48,12 @@ for file in "$anat_dir"/*T2w.nii.gz; do
 
   if [ -f "$file" ]; then
     echo "Traitement du fichier : $file"
-    
+
     # apply the segmentation of tss command
     $sct_command -i "$file"
 
     # apply the labeling command
-    $sct_command2 -i "$file" -s "$seg_path" -c t2
+    $sct_command2 -i "$file" -s "$seg_path"
 
     # apply labeling command
 
