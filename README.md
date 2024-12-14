@@ -21,13 +21,13 @@ The model is a 3D nnUNet, which was trained on T2-weighted images to segment the
 - [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) 
 - Python
 
-Once the dependencies are installed, download the latest rootlets model:
+Once the dependencies are installed, download the latest canal model:
 
 ```bash
 sct_deepseg -install-task canal_t2w
 ```
 
-### Getting the rootlet segmentation
+### Getting the canal segmentation
 
 To segment a single image, run the following command: 
 
