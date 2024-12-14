@@ -1,32 +1,41 @@
-# Installation
-Pour utiliser le code de segmentation du canal spinal à partir des segmentations de la moelle et du CSF il est nécessaire d'installer les librairies utilisées. la ligne qui permet d'installer ces librairie est incluse dans celles pour cloner le Github.
-Ensuite, il faut cloner le Github à l'aide de la suite de commande suivante : 
-~~~
-git clone https://github.com/ivadomed/model-csf-seg.git
-cd model-csg-seg
-pip install -r requirements.txt
-~~~
+# Automatic segmentation of spinal canal
 
-# Fonctionnement
-À partir de la segmentation de la moelle, le centre de masse est déterminé pour chaque tranche transversale.
-- Si il n'y as pas de segmentation du CSF (le CSF n'apparait pas sur l'image), on ne remplace pas l'image.
-- Si il n'y as pas de segmentation de la moelle, on met l'image à 0.
-- Si le CSF et la moelle on des segmentations sur la tranche, un floodfill est fait à partir du centre de masse déterminé plus haut.
-- Le code évalue ensuite si l'image est pleine de 1 (région non fermée lors du floodfill)
-- Si l'image est pleine de 1, on reprend l'image de base et on fait une fermeture.
-- Le fait de faire la fermeture sur certaines images ne semble pas causée d'ajout de bruit à l'extérieur du CSF selon ce que j'ai observé.
+<p align="center">
+  <img src="https://github.com/ivadomed/model-canal-seg/blob/abels/assets/canal_seg_visual.gif" alt="Segmentation on whole-spine image viewed on axial and sagittal planes" width="500">
+</p>
 
-# Utilisation
-Le code prend en entrée 3 arguments   
-* `-i`: Segmentation du CSF (.nii.gz)
+This repository contains the code for deep learning-based segmentation of the spinal canal. 
+The code is based on the [nnUNet framework](https://github.com/MIC-DKFZ/nnUNet).
 
-* `-s`:  Segmentation de la moelle épinière  (.nii.gz) 
+The spinal canal was defined using the anatomical boundary of the dural sac. The model was trained to segment all the structures within the dural sac, including the spinal cord, cerebrospinal fluid (CSF), and nerve rootlets.
 
-* `-o` Le nom que vous souhaiter donner au fichier (.nii.gz) 
+## Model Overview
 
-Voici donc un exemple de commande pour utiliser la fonction :
-~~~
-python3 fill-csf.py -i <CSF seg> -s <spinal cord seg> -o <output>
-~~~
- 
+The model is a 3D nnUNet, which was trained on T2-weighted images to segment the spinal canal. 
 
+## How to use the model
+
+### Install dependencies
+
+- [Spinal Cord Toolbox (SCT) v6.5](https://github.com/spinalcordtoolbox/spinalcordtoolbox/releases/tag/6.5) or higher -- follow the installation instructions [here](https://github.com/spinalcordtoolbox/spinalcordtoolbox?tab=readme-ov-file#installation)
+- [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) 
+- Python
+
+Once the dependencies are installed, download the latest rootlets model:
+
+```bash
+sct_deepseg -install-task canal_t2w
+```
+
+### Getting the rootlet segmentation
+
+To segment a single image, run the following command: 
+
+```bash
+sct_deepseg -i <INPUT> -o <OUTPUT> -task canal_t2w 
+```
+
+For example:
+
+```bash
+sct_deepseg -i sub-001_T2w.nii.gz -o sub-001_T2w_canal_seg.nii.gz -task canal_t2w 

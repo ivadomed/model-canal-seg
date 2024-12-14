@@ -1,4 +1,0 @@
-nibabel
-argparse
-opencv-python
-scikit-image
