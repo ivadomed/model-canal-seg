@@ -24,7 +24,7 @@ CANALSEG="$(realpath "${CANALSEG:-model-canal-seg}")"
 CANALSEG_DATA="$(realpath "${CANALSEG_DATA:-data}")"
 
 # Fetch path to data list
-data_json="$CANALSEG/canalseg/resources/data/training_data.json"
+data_json="$CANALSEG_DATA/canal.json"
 # Set the paths to the BIDS data folders
 bids="$CANALSEG_DATA"/bids
 
@@ -34,8 +34,15 @@ CURR_DIR="$(realpath .)"
 cd "$bids"
 
 datasets=(
-    https://github.com/OpenNeuroDatasets/ds005616.git
+    git@data.neuro.polymtl.ca:datasets/whole-spine.git
     https://github.com/spine-generic/data-multi-subject.git
+    git@data.neuro.polymtl.ca:datasets/dcm-zurich.git
+)
+
+sources=(
+    data.neuro
+    data.neuro
+    OpenNeuro
 )
 
 #commits=(
@@ -46,7 +53,7 @@ datasets=(
 # Clone datasets and checkout on the right branch
 for i in "${!datasets[@]}"; do
     ds=${datasets[i]}
-    commit=${commits[i]}
+    #commit=${commits[i]}
     dsn=$(basename $ds .git)
 
     # Clone the dataset from the specified repository
@@ -64,21 +71,21 @@ done
 
 keys=(
     IMAGE
-    LABEL_SPINE
-    LABEL_CORD
-    LABEL_CANAL
+    LABEL
 )
 
 # Download necessary data from git annex
 for key in "${keys[@]}"; do
-    for path in $(jq -r ".TRAINING | .[].$key" "$data_json"); do
+    for path in $(jq -r --arg k "$key" '.TRAINING[][$k]' "$data_json"); do
+        echo "Getting $path"
         IFS='/' read -r rep_path rel_path <<< "$path"
         git -C "$rep_path" annex get "$rel_path"
     done
 done
 
 for key in "${keys[@]}"; do
-    for path in $(jq -r ".TESTING | .[].$key" "$data_json"); do
+    for path in $(jq -r --arg k "$key" '.TESTING[][$k]' "$data_json"); do
+        echo "Getting $path"
         IFS='/' read -r rep_path rel_path <<< "$path"
         git -C "$rep_path" annex get "$rel_path"
     done
