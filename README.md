@@ -1,41 +1,27 @@
 # Automatic segmentation of spinal canal
 
-<p align="center">
-  <img src="https://github.com/ivadomed/model-canal-seg/blob/abels/assets/canal_seg_visual.gif" alt="Segmentation on whole-spine image viewed on axial and sagittal planes" width="500">
-</p>
+This repo countains the code to perform inference with the spinal canal segmentation model, and the code to train it. 
 
-This repository contains the code for deep learning-based segmentation of the spinal canal. 
-The code is based on the [nnUNet framework](https://github.com/MIC-DKFZ/nnUNet).
+# Inference
 
-The spinal canal was defined using the anatomical boundary of the dural sac. The model was trained to segment all the structures within the dural sac, including the spinal cord, cerebrospinal fluid (CSF), and nerve rootlets.
+In order to perform inference you need to: 
+TODO
 
-## Model Overview
+# Training 
 
-The model is a 3D nnUNet, which was trained on T2-weighted images to segment the spinal canal. 
+In order to train the model in a similar manner as what was done in the paper you need to: 
+Run the download_dataset.sh script: this script will read the `ressources/canal.json` file and automatically download the data for training and testing. 
 
-## How to use the model
-
-### Install dependencies
-
-- [Spinal Cord Toolbox (SCT) v6.5](https://github.com/spinalcordtoolbox/spinalcordtoolbox/releases/tag/6.5) or higher -- follow the installation instructions [here](https://github.com/spinalcordtoolbox/spinalcordtoolbox?tab=readme-ov-file#installation)
-- [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) 
-- Python
-
-Once the dependencies are installed, download the latest canal model:
-
-```bash
-sct_deepseg -install-task canal_t2w
+```bash 
+bash scripts/download_dataset.sh
 ```
 
-### Getting the canal segmentation
+## Warning
+For it to work you need to modify `DATASETS_PATH` in  `ressources/canal.json` using your local configuration. 
 
-To segment a single image, run the following command: 
-
-```bash
-sct_deepseg -i <INPUT> -o <OUTPUT> -task canal_t2w 
+After downloading the datasets you need to preprocess the data in a manner compatible with nnUNet by running: 
+```bash 
+bash scripts/prepare_datasets.sh 
 ```
 
-For example:
-
-```bash
-sct_deepseg -i sub-001_T2w.nii.gz -o sub-001_T2w_canal_seg.nii.gz -task canal_t2w 
+After doing that you can start training using nnUnetv2. 
