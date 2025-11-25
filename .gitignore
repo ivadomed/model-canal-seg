@@ -1,0 +1,6 @@
+#Remove MRI scans
+*.nii.gz
+*.nii
+
+#Remove data
+data* 
