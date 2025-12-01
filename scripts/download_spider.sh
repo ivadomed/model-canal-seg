@@ -24,9 +24,9 @@ CANALSEG="$(realpath "${CANALSEG:-model-canal-seg}")"
 CANALSEG_DATA="$(realpath "${CANALSEG_DATA:-data}")"
 
 # Fetch path to data list
-data_json="$CANALSEG_DATA/canal.json"
+data_json="$CANALSEG_DATA/spider.json"
 # Set the paths to the BIDS data folders
-bids="$CANALSEG_DATA"/bids
+bids="$CANALSEG_DATA"/spider
 
 # Make sure $CANALSEG_DATA/bids exists and enter it
 mkdir -p "$bids"
@@ -50,24 +50,6 @@ sources=(
 #    ba0131b7599a644c3488890e35b37cfc38ba5791
 #)
 
-# Clone datasets and checkout on the right branch
-for i in "${!datasets[@]}"; do
-    ds=${datasets[i]}
-    #commit=${commits[i]}
-    dsn=$(basename $ds .git)
-
-    # Clone the dataset from the specified repository
-    git clone "$ds"
-
-    # Enter the dataset directory
-    cd "$dsn"
-
-    ## Checkout on the commit
-    #git checkout "$commit"
-
-    # Move back to the parent directory to process the next dataset
-    cd ..
-done
 
 
 

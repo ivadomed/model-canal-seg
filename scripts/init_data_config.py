@@ -27,7 +27,7 @@ def get_parser():
                         help='If the type LABEL-MULTI is selected, this variable specifies the suffixes of the associated other label file. The labels must be stored inside the same folder')
     parser.add_argument('--keys-list', type=str, default='', nargs='+',
                         help='If the type LABEL-MULTI is selected, this variable specifies the keys used for each label file INCLUDING the default label.')
-    parser.add_argument('--split-validation', type=float, default=0.1,
+    parser.add_argument('--split-validation', type=float, default=0,
                         help='Split ratio for validation. Default=0.1')
     parser.add_argument('--split-test', type=float, default=0.1,
                         help='Split ratio for testing. Default=0.1')
@@ -53,6 +53,17 @@ def main():
     if args.type == 'LABEL':
         label_paths = file_paths
         img_paths = [get_img_path_from_label_path(lp) for lp in label_paths]
+
+        # Keep only label paths whose image exists
+        valid_pairs = [
+            (lp, ip) for lp, ip in zip(label_paths, img_paths)
+            if os.path.isfile(ip)
+        ]
+
+        # Unpack
+        label_paths = [lp for lp, _ in valid_pairs]
+        img_paths   = [ip for _, ip in valid_pairs]
+
         file_paths = label_paths + img_paths
     elif args.type == 'IMAGE':
         img_paths = file_paths
@@ -84,10 +95,9 @@ def main():
         file_paths =  img_paths + [file for li in labels_list_paths for file in li]
     else:
         raise ValueError(f"invalid args.type: {args.type}")
-    missing_paths = [
-        path for path in file_paths
-        if not os.path.isfile(path)
-    ]
+    file_paths = [p for p in file_paths if os.path.isfile(p)]
+    missing_paths = [p for p in file_paths if not os.path.isfile(p)]
+
     
     if missing_paths:
         raise ValueError("missing files:\n" + '\n'.join(sorted(missing_paths)))

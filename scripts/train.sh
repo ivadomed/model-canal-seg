@@ -1,15 +1,7 @@
 #!/bin/bash
 
-# This script train the TotalSpineSeg nnUNet models.
+# This script train the CanalSeg nnUNet model.
 # It get also optional parameters DATASET and FOLD.
-# By default, it trains the models for datasets 101 and 102 with fold 0.
-
-# The script excpects the following environment variables to be set:
-#   TOTALSPINESEG: The path to the TotalSpineSeg repository.
-#   TOTALSPINESEG_DATA: The path to the TotalSpineSeg data folder.
-#   TOTALSPINESEG_JOBS: The number of CPU cores to use. Default is the number of CPU cores available.
-#   TOTALSPINESEG_JOBSNN: The number of jobs to use for the nnUNet. Default is the number of CPU cores available or the available memory in GB divided by 8, whichever is smaller.
-#   TOTALSPINESEG_DEVICE: The device to use. Default is "cuda" if available, otherwise "cpu".
 
 # BASH SETTINGS
 # ======================================================================================================================
@@ -27,15 +19,14 @@ trap "echo Caught Keyboard Interrupt within script. Exiting now.; exit" INT
 # ======================================================================================================================
 
 # Set the datasets to work with - default is 101 102
-DATASETS=${1:-101 102}
-if [ "$DATASETS" == all ]; then DATASETS=(101 102); fi
+DATASETS=${1:-101}
 
 # Set the fold to work with - default is 0
 FOLD=${2:-0}
 
-# set TOTALSPINESEG and TOTALSPINESEG_DATA if not set
-TOTALSPINESEG="$(realpath "${TOTALSPINESEG:-totalspineseg}")"
-TOTALSPINESEG_DATA="$(realpath "${TOTALSPINESEG_DATA:-data}")"
+# set CANALSEG and CANALSEG_DATA if not set
+CANALSEG="$(realpath "${CANALSEG:-model-canal-seg}")"
+CANALSEG_DATA="$(realpath "${CANALSEG_DATA:-data}")"
 
 # Get the number of CPUs
 CORES=${SLURM_JOB_CPUS_PER_NODE:-$(lscpu -p | egrep -v '^#' | wc -l)}
@@ -49,21 +40,21 @@ JOBS=${TOTALSPINESEG_JOBS:-$CORES}
 # Set the number of jobs for the nnUNet
 JOBSNN=$(( JOBS < $((MEMGB / 8)) ? JOBS : $((MEMGB / 8)) ))
 JOBSNN=$(( JOBSNN < 1 ? 1 : JOBSNN ))
-JOBSNN=${TOTALSPINESEG_JOBSNN:-$JOBSNN}
+JOBSNN=${CANALSEG_JOBSNN:-$JOBSNN}
 
 # Set the device to cpu if cuda is not available
-DEVICE=${TOTALSPINESEG_DEVICE:-$(python3 -c "import torch; print('cuda' if torch.cuda.is_available() else 'cpu')")}
+DEVICE=${CANALSEG_DEVICE:-$(python3 -c "import torch; print('cuda' if torch.cuda.is_available() else 'cpu')")}
 
 # Set nnunet params
 export nnUNet_def_n_proc=$JOBSNN
 export nnUNet_n_proc_DA=$JOBSNN
-export nnUNet_raw="$TOTALSPINESEG_DATA"/nnUNet/raw
-export nnUNet_preprocessed="$TOTALSPINESEG_DATA"/nnUNet/preprocessed
-export nnUNet_results="$TOTALSPINESEG_DATA"/nnUNet/results
-export nnUNet_exports="$TOTALSPINESEG_DATA"/nnUNet/exports
+export nnUNet_raw="$CANALSEG_DATA"/nnUNet/raw
+export nnUNet_preprocessed="$CANALSEG_DATA"/nnUNet/preprocessed
+export nnUNet_results="$CANALSEG_DATA"/nnUNet/results
+export nnUNet_exports="$CANALSEG_DATA"/nnUNet/exports
 
 # Copy auglab trainer to nnunet folder
-auglab_add_nnunettrainer -t nnUNetTrainerDAExt
+auglab_add_nnunettrainer -t nnUNetTrainerDAExtGPU
 
 nnUNetTrainer=${3:-nnUNetTrainerDAExtGPU}
 nnUNetPlanner=${4:-nnUNetPlannerResEncL}
