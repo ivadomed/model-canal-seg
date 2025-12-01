@@ -1,15 +1,7 @@
 #!/bin/bash
 
-# This script prepares datasets for the TotalSpineSeg model in nnUNetv2 structure.
-# The script execpt DATASET as the first positional argument to specify the dataset to prepare.
-# It can be either 101, 102, 103 or all. If all is specified, it will prepare all datasets (101, 102, 103).
-# By default, it will prepare datasets 101 and 102.
-# The script also exepct -noaug parameter to not generate augmentations.
+# This prepares the datasets required to train the model for canal segmentation in the nnUNet format.
 
-# The script excpects the following environment variables to be set:
-#   TOTALSPINESEG: The path to the TotalSpineSeg repository.
-#   TOTALSPINESEG_DATA: The path to the TotalSpineSeg data folder.
-#   TOTALSPINESEG_JOBS: The number of CPU cores to use. Default is the number of CPU cores available.
 
 # BASH SETTINGS
 # ======================================================================================================================
@@ -31,11 +23,8 @@ trap "echo Caught Keyboard Interrupt within script. Exiting now.; exit" INT
 CANALSEG="$(realpath "${CANALSEG:-model-canal-seg}")"
 CANALSEG_DATA="$(realpath "${CANALSEG_DATA:-data}")"
 
-# Set the path to the resources folder
-RESSOURCES="$(realpath "${RESSOURCES:-ressources}")"
-
 # Fetch path to data list
-data_json="$RESSOURCES/canal.json"
+data_json="$CANALSEG_DATA/canal.json"
 
 # Get the number of CPUs
 CORES=${SLURM_JOB_CPUS_PER_NODE:-$(lscpu -p | egrep -v '^#' | wc -l)}
