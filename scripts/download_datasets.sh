@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# This script get the datasets require to train the model from:
-#   https://github.com/OpenNeuroDatasets/ds005616.git
-#   https://github.com/spine-generic/data-multi-subject
+# This script get the datasets required to train the model
 
 # BASH SETTINGS
 # ======================================================================================================================
@@ -39,11 +37,7 @@ datasets=(
     git@data.neuro.polymtl.ca:datasets/dcm-zurich.git
 )
 
-sources=(
-    data.neuro
-    data.neuro
-    OpenNeuro
-)
+
 
 #commits=(
 #    1.1.2
@@ -69,7 +63,22 @@ for i in "${!datasets[@]}"; do
     cd ..
 done
 
+cd ..  # Move back to data directory
+# Check if canal.json exists
+if [[ -f canal.json ]]; then
+    echo "canal.json found — skipping canal_seg generation."
+else
+    echo "canal.json not found — generating canal_seg.txt and running init_data_config.py"
 
+
+    # Find canal segmentation labels (excluding MTS), sort them, save to text file
+    find ~+ -type f -name "*_label-canal_seg.nii.gz" | grep -v "MTS" | sort > canal.txt
+
+    # Run your data config script
+    python "$CANALSEG/scripts/init_data_config.py" --txt canal.txt --type LABEL
+fi
+
+cd "$bids"
 
 keys=(
     IMAGE
