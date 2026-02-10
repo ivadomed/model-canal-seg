@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# This prepares the datasets required to train the model for canal segmentation in the nnUNet format.
+
+
+# BASH SETTINGS
+# ======================================================================================================================
+
+# Uncomment for full verbose
+# set -v
+
+# Immediately exit if error
+set -e
+
+# Exit if user presses CTRL+C (Linux) or CMD+C (OSX)
+trap "echo Caught Keyboard Interrupt within script. Exiting now.; exit" INT
+
+# SCRIPT STARTS HERE
+# ======================================================================================================================
+
+
+# Set CANALSEG and CANALSEG_DATA if not set
+CANALSEG="$(realpath "${CANALSEG:-model-canal-seg}")"
+CANALSEG_DATA="$(realpath "${CANALSEG_DATA:-data}")"
+
+# Fetch path to data list
+data_json="$CANALSEG_DATA/canal_seg_NSpilot/EPI_canal.json"
+
+# Get the number of CPUs
+CORES=${SLURM_JOB_CPUS_PER_NODE:-$(lscpu -p | egrep -v '^#' | wc -l)}
+
+# Set the number of jobs
+JOBS=${CANALSEG_JOBS:-$CORES}
+
+# Set nnunet params
+nnUNet_raw="$CANALSEG_DATA"/nnUNet/raw
+
+# Set the paths to the BIDS data folders
+bids="$CANALSEG_DATA"/canal_seg_NSpilot
+
+SRC_DATASET=Dataset103_canal_seg_NSpilot
+
+### Prepare TRAIN set
+
+echo "Make nnUNet raw folders"
+mkdir -p "$nnUNet_raw"/$SRC_DATASET/imagesTr
+mkdir -p "$nnUNet_raw"/$SRC_DATASET/labelsTr
+
+# Move to bids directory
+CURR_DIR="$(realpath .)"
+cd "$bids"
+
+# Copy images and labels and add nnUNet suffix _0000
+echo "Copy images and labels with generated IDs"
+
+
+
+i=0
+for img in $(jq -r ".TRAINING | .[].IMAGE" "$data_json"); do
+    base=$(basename "$img" .nii.gz)
+    id=$(printf "%03d" $i)
+
+    # Image filename: sub-name_0000.nii.gz → sub-name_000_0000.nii.gz
+    img_name="${base}_${id}_0000.nii.gz"
+    echo "Copying image: $img to $nnUNet_raw/$SRC_DATASET/imagesTr/$img_name"
+    cp "$img" "$nnUNet_raw"/$SRC_DATASET/imagesTr/"$img_name"
+
+    # Label filename: sub-name.nii.gz → sub-name_000.nii.gz
+    label=$(jq -r ".TRAINING | .[] | select(.IMAGE==\"$img\") | .LABEL" "$data_json")
+    label_name="${base}_${id}.nii.gz"
+    cp "$label" "$nnUNet_raw"/$SRC_DATASET/labelsTr/"$label_name"
+
+    i=$((i+1))
+done
+
+# Average all scans
+for f in "$nnUNet_raw"/$SRC_DATASET/imagesTr/*.nii.gz; do
+    sct_maths -i "$f" -mean t -o "$f"
+done
+
+# Average all scans
+for f in "$nnUNet_raw"/$SRC_DATASET/labelsTr/*.nii.gz; do
+    sct_maths -i "$f" -mean t -o "$f"
+done
+
+
+# Reorient images to canonical space
+echo "Transform images to canonical space"
+for f in "$nnUNet_raw"/$SRC_DATASET/imagesTr/*.nii.gz; do
+    sct_image -i "$f" -setorient RAS -o "$f"
+done
+
+# Reorient labels to canonical space
+echo "Transform labels to canonical space"
+for f in "$nnUNet_raw"/$SRC_DATASET/labelsTr/*.nii.gz; do
+    sct_image -i "$f" -setorient RAS -o "$f"
+done
+
+# Resample images to 1x1x1 mm
+echo "Resample images to 1x1x1mm"
+for f in "$nnUNet_raw"/$SRC_DATASET/imagesTr/*.nii.gz; do
+    sct_resample -i "$f" -mm 1x1x1 -o "$f"
+done
+
+# Transform labels (nearest neighbor)
+echo "Transform labels to image space"
+for f in "$nnUNet_raw"/$SRC_DATASET/labelsTr/*.nii.gz; do
+    sct_resample -i "$f" -mm 1x1x1 -x nn -o "$f"
+done
+
+
+
+
+# Move back
+cd "$CURR_DIR"

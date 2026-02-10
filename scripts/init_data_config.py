@@ -28,9 +28,9 @@ def get_parser():
     parser.add_argument('--keys-list', type=str, default='', nargs='+',
                         help='If the type LABEL-MULTI is selected, this variable specifies the keys used for each label file INCLUDING the default label.')
     parser.add_argument('--split-validation', type=float, default=0,
-                        help='Split ratio for validation. Default=0.1')
-    parser.add_argument('--split-test', type=float, default=0.1,
-                        help='Split ratio for testing. Default=0.1')
+                        help='Split ratio for validation. Default=0')
+    parser.add_argument('--split-test', type=float, default=1,
+                        help='Split ratio for testing. Default=1')
     return parser
 
 # Determine specified contrasts
