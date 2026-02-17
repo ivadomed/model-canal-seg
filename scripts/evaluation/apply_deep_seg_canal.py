@@ -51,9 +51,9 @@ def main(input_folder, output_folder, recursive=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Batch run sct_deepseg sc_canal_t2 on all files in a folder.")
-    parser.add_argument("--input_folder", help="Folder containing input files")
-    parser.add_argument("--output_folder", default="deepseg_canal_results", help="Folder to save results")
+    parser.add_argument("-i", help="Folder containing input files")
+    parser.add_argument("-o", default="deepseg_canal_results", help="Folder to save results")
     parser.add_argument("--recursive", action="store_true", help="Search recursively in subfolders")
     args = parser.parse_args()
 
-    main(args.input_folder, args.output_folder, args.recursive)
+    main(args.i, args.o, args.recursive)

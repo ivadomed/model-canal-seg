@@ -16,9 +16,9 @@ from utils import dice_score
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-pred-folder", required=True, type=str)
-    parser.add_argument("-label-folder", required=True, type=str)
-    parser.add_argument("-output-folder", required=True, type=str)
+    parser.add_argument("-p", required=True, type=str)
+    parser.add_argument("-l", required=True, type=str)
+    parser.add_argument("-o", required=True, type=str)
     return parser.parse_args()
 
 
@@ -36,9 +36,9 @@ def get_contrast_from_name(name: str):
 
 def main():
     args = parse_args()
-    pred_folder = Path(args.pred_folder)
-    label_folder = Path(args.label_folder)
-    output_folder = Path(args.output_folder)
+    pred_folder = Path(args.p)
+    label_folder = Path(args.l)
+    output_folder = Path(args.o)
     output_folder.mkdir(parents=True, exist_ok=True)
 
     predictions = list(pred_folder.rglob("*.nii.gz"))
