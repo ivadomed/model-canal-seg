@@ -35,7 +35,7 @@ CORES=${SLURM_JOB_CPUS_PER_NODE:-$(lscpu -p | egrep -v '^#' | wc -l)}
 MEMGB=$(awk '/MemTotal/ {print int($2/1024/1024)}' /proc/meminfo)
 
 # Set the number of jobs
-JOBS=${TOTALSPINESEG_JOBS:-$CORES}
+JOBS=${CANALSEG_JOBS:-$CORES}
 
 # Set the number of jobs for the nnUNet
 JOBSNN=$(( JOBS < $((MEMGB / 8)) ? JOBS : $((MEMGB / 8)) ))
@@ -52,9 +52,6 @@ export nnUNet_raw="$CANALSEG_DATA"/nnUNet/raw
 export nnUNet_preprocessed="$CANALSEG_DATA"/nnUNet/preprocessed
 export nnUNet_results="$CANALSEG_DATA"/nnUNet/results
 export nnUNet_exports="$CANALSEG_DATA"/nnUNet/exports
-
-# Copy auglab trainer to nnunet folder
-auglab_add_nnunettrainer -t nnUNetTrainerDAExtGPU
 
 nnUNetTrainer=${3:-nnUNetTrainerDAExtGPU}
 nnUNetPlanner=${4:-nnUNetPlannerResEncL}
@@ -99,7 +96,9 @@ for d in ${DATASETS[@]}; do
     fi
 
     echo "Training dataset $d_name fold $FOLD"
-    AUGLAB_PARAMS_GPU_JSON=$TOTALSPINESEG/totalspineseg/models/transforms_gpu.json nnUNetv2_train $d $configuration $FOLD -tr $nnUNetTrainer -p $nnUNetPlans --c -device $DEVICE
+    #AUGLAB_PARAMS_GPU_JSON=$TOTALSPINESEG/totalspineseg/models/transforms_gpu.json 
+    
+    nnUNetv2_train $d $configuration $FOLD -tr $nnUNetTrainer -p $nnUNetPlans --c -device $DEVICE
 
     echo "Export the model for dataset $d_name in "$nnUNet_exports""
     mkdir -p "$nnUNet_exports"
