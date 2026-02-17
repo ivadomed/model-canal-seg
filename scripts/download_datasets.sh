@@ -35,19 +35,20 @@ datasets=(
     git@data.neuro.polymtl.ca:datasets/whole-spine.git
     https://github.com/spine-generic/data-multi-subject.git
     git@data.neuro.polymtl.ca:datasets/dcm-zurich.git
+    git@data.neuro.polymtl.ca:datasets/spider-challenge-2023.git
 )
 
-
-
-#commits=(
-#    1.1.2
-#    ba0131b7599a644c3488890e35b37cfc38ba5791
-#)
+commits=(
+    0dc272e65dabfced28a0d1c93b389ef7c2b3d9dd
+    ba0131b7599a644c3488890e35b37cfc38ba5791
+    98d6f828748711fb1284ec50b6d65c8fcee185db
+    d9be04cfb27da100fe03d968e220cccebbbc9a3f
+)
 
 # Clone datasets and checkout on the right branch
 for i in "${!datasets[@]}"; do
     ds=${datasets[i]}
-    #commit=${commits[i]}
+    commit=${commits[i]}
     dsn=$(basename $ds .git)
 
     # Clone the dataset from the specified repository
@@ -57,7 +58,7 @@ for i in "${!datasets[@]}"; do
     cd "$dsn"
 
     ## Checkout on the commit
-    #git checkout "$commit"
+    git checkout "$commit"
 
     # Move back to the parent directory to process the next dataset
     cd ..
