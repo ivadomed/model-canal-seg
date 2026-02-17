@@ -54,17 +54,17 @@ def main():
     )
 
     parser.add_argument(
-        "--input-dir", type=str, required=True,
+        "-i", type=str, required=True,
         help="Folder containing .nii.gz files to process."
     )
     parser.add_argument(
-        "--output-dir", type=str, required=True,
+        "-o", type=str, required=True,
         help="Where processed files will be saved."
     )
 
     args = parser.parse_args()
 
-    process_folder(args.input_dir, args.output_dir)
+    process_folder(args.i, args.o)
 
 
 if __name__ == "__main__":
