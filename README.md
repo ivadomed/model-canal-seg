@@ -5,7 +5,7 @@ This repo countains the code to perform inference with the spinal canal segmenta
 # Requirements
 
 If you want to perform only the inference you should use the [Spinal Cord Toolbox](https://spinalcordtoolbox.com/stable/) and follow the instructions [here](). 
-Otherwise if you would rather work with the code, you should install nnUNetv2 by following the instructions [here](https://github.com/DIAGNijmegen/nnUNet_v2). 
+Otherwise if you would rather work with the code, you should install nnUNetv2 by following the instructions [here](https://github.com/MIC-DKFZ/nnUNet). 
 
 ## Warning
 Whatever you do you should install SCT as it's needed for preprocessing of your data. 
