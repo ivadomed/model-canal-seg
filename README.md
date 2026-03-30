@@ -2,6 +2,11 @@
 
 Contrast-agnostic spinal canal segmentation model trained with the [nnUNetv2](https://github.com/MIC-DKFZ/nnUNet) framework. The model segments the spinal canal (dural sac) and outputs a binary segmentation mask. It was designed to work across MRI contrasts and varying resolutions, fields of view, and pathologies.
 
+<p align="center">
+  <img src="assets/canal_seg_visual.gif" alt="Segmentation on whole-spine image viewed on axial and sagittal planes" width="500">
+</p>
+
+
 ## Table of Contents
 
 - [Dependencies](#dependencies)
