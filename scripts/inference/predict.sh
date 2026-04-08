@@ -112,15 +112,19 @@ cp "$INPUT_IMAGE" "$TMP_INPUT"
 # ======================================================================================================================
 
 echo "[2/5] Reorienting to RAS..."
-# Record native orientation so we can invert it later
+# Record native orientation in SCT convention.
+# nibabel's aff2axcodes() returns the direction of the *positive* voxel axes (e.g. RAS),
+# whereas SCT's -setorient uses the *negative*-axis (radiological) convention — the
+# opposite letter for each axis.  So nibabel RAS == SCT LPI, etc.
 NATIVE_ORIENT=$(python3 - <<EOF
 import nibabel as nib
 img = nib.load("$INPUT_IMAGE")
+flip = {"R": "L", "L": "R", "A": "P", "P": "A", "S": "I", "I": "S"}
 orient = nib.aff2axcodes(img.affine)
-print("".join(orient))
+print("".join(flip[c] for c in orient))
 EOF
 )
-echo "      Native orientation: $NATIVE_ORIENT"
+echo "      Native orientation: $NATIVE_ORIENT (SCT convention)"
 
 sct_image -i "$TMP_INPUT" -setorient RAS -o "$TMP_INPUT"
 
@@ -175,7 +179,7 @@ fi
 echo "[5/5] Resampling prediction back to native space (${NATIVE_RES} mm) with nearest-neighbour interpolation..."
 sct_resample -i "$TMP_PRED" -mm "$NATIVE_RES" -x nn -o "$TMP_PRED"
 
-echo "      Reorienting prediction back to native orientation (${NATIVE_ORIENT})..."
+echo "      Reorienting prediction back to native orientation (${NATIVE_ORIENT}, SCT convention)..."
 sct_image -i "$TMP_PRED" -setorient "$NATIVE_ORIENT" -o "$TMP_PRED"
 
 # ======================================================================================================================
