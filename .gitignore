@@ -1,0 +1,9 @@
+#Remove MRI scans
+*.nii.gz
+*.nii
+
+#Remove data
+data* 
+
+#Remove pycache 
+__pycache__
